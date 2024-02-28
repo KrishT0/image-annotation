@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import data from "./data.json";
 
 const ImageAnnotationTool = () => {
   const [drawingData, setDrawingData] = useState([]);
@@ -6,6 +7,31 @@ const ImageAnnotationTool = () => {
   const [savedPolygons, setSavedPolygons] = useState([]);
 
   const imageRef = useRef(null);
+
+  const reverseTransformArray = (inputArrays) => {
+    return inputArrays.map((inputArray) => {
+      return inputArray.map((point, index, array) => {
+        const nextIndex = (index + 1) % array.length;
+        return {
+          start: { x: point.x, y: point.y },
+          end:
+            array[nextIndex] !== undefined
+              ? { x: array[nextIndex].x, y: array[nextIndex].y }
+              : { x: array[0].x, y: array[0].y },
+        };
+      });
+    });
+  };
+
+  const transformArray = (inputArray) => {
+    return inputArray.map((subArray) => subArray.map(({ start }) => start));
+  };
+
+  // Transform the imported data using reverseTransformArray and set it to savedPolygons
+  React.useEffect(() => {
+    const transformedData = reverseTransformArray(data);
+    setSavedPolygons(transformedData);
+  }, []); // Run the effect once on component mount
 
   const handleMouseDown = (e) => {
     const { offsetX, offsetY } = e.nativeEvent;
@@ -19,9 +45,6 @@ const ImageAnnotationTool = () => {
       setStartPoint({ x: offsetX, y: offsetY });
     } else {
       // Set startPoint if it doesn't exist
-      setDrawingData([
-        { start: { x: offsetX, y: offsetY }, end: { x: offsetX, y: offsetY } },
-      ]);
       setStartPoint({ x: offsetX, y: offsetY });
     }
   };
@@ -79,94 +102,148 @@ const ImageAnnotationTool = () => {
   };
 
   const handleSendData = () => {
-    console.log("All Selected Areas:", savedPolygons);
+    const startPointsOnly = transformArray(savedPolygons);
+    console.log("All Selected Start Points:", startPointsOnly);
+    console.log(
+      "All Selected Start Points (Reversed):",
+      reverseTransformArray(startPointsOnly)
+    );
   };
 
   return (
     <div
       style={{
         position: "relative",
-        cursor: `url('.././cursor.png'), auto`,
+        width: "100%",
+        display: "flex",
+        gap: "1rem",
       }}
     >
-      <img
-        ref={imageRef}
-        src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        alt="Annotated Image"
-        style={{ maxWidth: "60%", height: "auto" }}
-        onMouseDown={handleMouseDown}
-      />
-
-      {drawingData.map((line, index) => (
-        <div
-          key={index}
-          style={{
-            position: "absolute",
-            top: line.start.y,
-            left: line.start.x,
-            width: Math.sqrt(
-              Math.pow(line.end.x - line.start.x, 2) +
-                Math.pow(line.end.y - line.start.y, 2)
-            ),
-            height: 2,
-            backgroundColor: "red",
-            transform: `rotate(${Math.atan2(
-              line.end.y - line.start.y,
-              line.end.x - line.start.x
-            )}rad)`,
-            transformOrigin: "0 0",
-            pointerEvents: "none",
-          }}
+      <div>
+        <img
+          ref={imageRef}
+          src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          alt="Annotated Image"
+          style={{ maxWidth: "100%", height: "auto" }}
+          onMouseDown={handleMouseDown}
         />
-      ))}
-      {startPoint && (
-        <div
-          style={{
-            position: "absolute",
-            top: startPoint.y - 2,
-            left: startPoint.x - 2,
-            width: 4,
-            height: 4,
-            backgroundColor: "red",
-            borderRadius: "50%",
-            pointerEvents: "none",
-          }}
-        />
-      )}
 
-      <svg
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          pointerEvents: "none",
-        }}
-        width="100%"
-        height="100%"
-      >
-        {/* Saved Polygons */}
-        {savedPolygons.map((polygon, polyIndex) => (
-          <polygon
-            key={polyIndex}
-            fill="rgba(0, 255, 0, 0.3)"
-            points={polygon
-              .flatMap((point) => [point.start.x, point.start.y])
-              .join(" ")}
+        {drawingData.map((line, index) => (
+          <div
+            key={index}
+            style={{
+              position: "absolute",
+              top: line.start.y,
+              left: line.start.x,
+              width: Math.sqrt(
+                Math.pow(line.end.x - line.start.x, 2) +
+                  Math.pow(line.end.y - line.start.y, 2)
+              ),
+              height: 2,
+              backgroundColor: "red",
+              transform: `rotate(${Math.atan2(
+                line.end.y - line.start.y,
+                line.end.x - line.start.x
+              )}rad)`,
+              transformOrigin: "0 0",
+              pointerEvents: "none",
+            }}
           />
         ))}
+        {startPoint && (
+          <div
+            style={{
+              position: "absolute",
+              top: startPoint.y - 2,
+              left: startPoint.x - 2,
+              width: 4,
+              height: 4,
+              backgroundColor: "red",
+              borderRadius: "50%",
+              pointerEvents: "none",
+            }}
+          />
+        )}
 
-        {/* Highlight Polygon */}
-        <polygon
-          fill="rgba(0, 255, 0, 0.3)"
-          points={calculateHighlightPoints().flat().join(" ")}
-        />
-      </svg>
+        <svg
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            pointerEvents: "none",
+          }}
+          width="100%"
+          height="100%"
+        >
+          {/* Saved Polygons */}
+          {savedPolygons.map((polygon, polyIndex) => (
+            <polygon
+              key={polyIndex}
+              fill="rgba(0, 255, 0, 0.3)"
+              points={polygon
+                .flatMap((point) => [point.start.x, point.start.y])
+                .join(" ")}
+            />
+          ))}
 
-      <button onClick={handleUndo} disabled={drawingData.length === 0}>
-        Undo
-      </button>
-      <button onClick={handleDone}>Done</button>
-      <button onClick={handleSendData}>Send Data</button>
+          {/* Highlight Polygon */}
+          <polygon
+            fill="rgba(0, 255, 0, 0.3)"
+            points={calculateHighlightPoints().flat().join(" ")}
+          />
+        </svg>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.3rem",
+        }}
+      >
+        <button
+          onClick={handleUndo}
+          disabled={drawingData.length === 0}
+          style={{
+            cursor: "pointer",
+            backgroundColor: "black",
+            width: "5rem",
+            height: "2rem",
+            color: "white",
+            borderRadius: "0.5rem",
+            outline: "none",
+          }}
+        >
+          Undo
+        </button>
+        <button
+          onClick={handleDone}
+          style={{
+            cursor: "pointer",
+            backgroundColor: "black",
+            width: "5rem",
+            height: "2rem",
+            color: "white",
+            borderRadius: "0.5rem",
+            outline: "none",
+          }}
+        >
+          Done
+        </button>
+        <button
+          onClick={handleSendData}
+          style={{
+            cursor: "pointer",
+            backgroundColor: "black",
+            width: "5rem",
+            height: "2rem",
+            color: "white",
+            borderRadius: "0.5rem",
+            outline: "none",
+          }}
+        >
+          Send Data
+        </button>
+      </div>
     </div>
   );
 };

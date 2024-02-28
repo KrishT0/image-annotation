@@ -23,7 +23,14 @@ export default function App() {
       ) : (
         <p>Select an image to annotate.</p>
       )} */}
-      <ImageAnotation />
+      <div
+        style={{
+          maxWidth: "1000px",
+          margin: "0 auto",
+        }}
+      >
+        <ImageAnotation />
+      </div>
       {/* <DrawingApp /> */}
     </div>
   );
