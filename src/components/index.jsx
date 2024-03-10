@@ -108,8 +108,16 @@ const ImageAnnotationTool = () => {
       "All Selected Start Points (Reversed):",
       reverseTransformArray(startPointsOnly)
     );
-  };
 
+    // Convert the startPointsOnly array to JSON and save it to a file
+    const jsonData = JSON.stringify(startPointsOnly, null, 2);
+    const blob = new Blob([jsonData], { type: "application/json" });
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "coordinates.json";
+    a.click();
+  };
   return (
     <div
       style={{
