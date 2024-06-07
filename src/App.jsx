@@ -1,37 +1,43 @@
 import ImageAnotation from "./components";
-import DrawingApp from "./components/line";
 import { useState } from "react";
 export default function App() {
-  // const [image, setImage] = useState(null);
+  const [image, setImage] = useState(null);
 
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setImage(reader.result);
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
-    <div className="container">
-      {/* <input type="file" accept="image/*" onChange={handleImageChange} />
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "1rem",
+        height: "100vh",
+      }}
+    >
+      <input type="file" accept="image/*" onChange={handleImageChange} />
       {image ? (
-        <ImageAnotation imageSrc={image} />
+        <div
+          style={{
+            maxWidth: "1000px",
+            margin: "0 auto",
+          }}
+        >
+          <ImageAnotation imageSrc={image} />
+        </div>
       ) : (
         <p>Select an image to annotate.</p>
-      )} */}
-      <div
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-        }}
-      >
-        <ImageAnotation />
-      </div>
-      {/* <DrawingApp /> */}
+      )}
     </div>
   );
 }

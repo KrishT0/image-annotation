@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
-import data from "./data.json";
+// import data from "./data.json";
 
-const ImageAnnotationTool = () => {
+const ImageAnnotationTool = ({ imageSrc }) => {
   const [drawingData, setDrawingData] = useState([]);
   const [startPoint, setStartPoint] = useState(null);
   const [savedPolygons, setSavedPolygons] = useState([]);
@@ -28,10 +28,10 @@ const ImageAnnotationTool = () => {
   };
 
   // Transform the imported data using reverseTransformArray and set it to savedPolygons
-  React.useEffect(() => {
-    const transformedData = reverseTransformArray(data);
-    setSavedPolygons(transformedData);
-  }, []); // Run the effect once on component mount
+  // React.useEffect(() => {
+  //   const transformedData = reverseTransformArray(); //add imported data to show periviously saved polygons
+  //   setSavedPolygons(transformedData);
+  // }, []); // Run the effect once on component mount
 
   const handleMouseDown = (e) => {
     const { offsetX, offsetY } = e.nativeEvent;
@@ -130,7 +130,7 @@ const ImageAnnotationTool = () => {
       <div>
         <img
           ref={imageRef}
-          src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          src={imageSrc}
           alt="Annotated Image"
           style={{ maxWidth: "100%", height: "auto" }}
           onMouseDown={handleMouseDown}
